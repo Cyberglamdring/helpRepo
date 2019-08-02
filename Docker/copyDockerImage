@@ -4,4 +4,4 @@ dockerImageHome = "/var/lib/docker/image/overlay2/imagedb/content/sha256"
 CopyFolder = "~/Downloads"
 
 sudo ls $dockerImageHome | grep $imageID
-sudo cp $dockerImageHome/$imageID
+sudo cp $dockerImageHome/$imageID $CopyFolder
