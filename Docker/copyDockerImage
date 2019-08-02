@@ -1,0 +1,7 @@
+#!/bin/bash
+imageID = "87e7261a7678766f6f8a54907d9c98764814179a9ad2f50c1b13ea1ac48e7e8b"
+dockerImageHome = "/var/lib/docker/image/overlay2/imagedb/content/sha256"
+CopyFolder = "~/Downloads"
+
+sudo ls $dockerImageHome | grep $imageID
+sudo cp $dockerImageHome/$imageID
