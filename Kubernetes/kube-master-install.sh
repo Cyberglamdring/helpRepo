@@ -53,9 +53,9 @@ if [[ ! -e $dockerJson/daemon.json ]]; then
 fi
 tee $dockerJson/daemon.json <<EOF
 {
-	"exec-opts": [
-		"native.cgroupdriver=systemd"
-	]
+  "exec-opts": [
+    "native.cgroupdriver=systemd"
+  ]
 }
 EOF
 
