@@ -5,11 +5,11 @@ Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
   config.vm.box_check_update = false
   config.vm.hostname = "kubernetes-srv"
-  config.vm.network :private_network, ip: "192.168.56.225"
+  config.vm.network "private_network", ip: "172.21.12.10", auto_config: false
   config.vm.provider "hyperv" do |hv|
     hv.vmname = "k8s-master"
     hv.memory = 4096
     hv.cpus = 2
   end
-  config.vm.provision "shell", path: "k8s-master-install.sh"
+  # config.vm.provision "shell", path: "scripts/k8s-master-install.sh"
 end
