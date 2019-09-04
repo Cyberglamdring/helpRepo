@@ -14,6 +14,10 @@ metalLbIp=192.168.56.240/28
 flanelLink="https://raw.githubusercontent.com/coreos/flannel/" \
   "62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml"
 metalLbLink=https://raw.githubusercontent.com/google/metallb/v0.8.0/manifests/metallb.yaml
+ingMandatory=https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
+ingCloudGeneric=https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
+ingServiceNodeport=https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/baremetal/service-nodeport.yaml
+
 # -----------------------------
 # Preparing
 # -----------------------------
@@ -27,7 +31,8 @@ yum install -y deltarpm \
   net-tools \
   bind-utiles \
   moreutils \
-  yum-utils
+  yum-utils \
+  git
 
 # 2: Install Docker
 # 2.1: work via repository
@@ -106,9 +111,12 @@ sudo kubeadm init \
   --token tqqm17.dq8rsbk5k8tps07y
 
 # 3: Saveing config
+# also reply thsi step in you local PC
 if [[ ! -e $HOME/.kube ]]; then
 mkdir -p $HOME/.kube
 fi
+/bin/cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config
 
 # 4: Deploying POD Network
 kubectl apply -f $flanelLink
@@ -151,3 +159,24 @@ data:
       addresses:
       - $metalLbIp
 EOF
+
+# 6: Nginx Ingress Controller
+kubectl apply -f $ingMandatory
+# Create a service
+kubectl apply -f $ingCloudGeneric
+kubectl apply -f $ingServiceNodeport
+
+cd /tmp/
+git clone https://github.com/nginxinc/kubernetes-ingress.git
+cd kubernetes-ingress/
+git checkout v1.5.0
+cd ./deployments
+
+kubectl apply -f common/ns-and-sa.yaml
+kubectl apply -f common/default-server-secret.yaml
+kubectl apply -f common/nginx-config.yaml
+kubectl apply -f rbac/rbac.yaml
+kubectl apply -f deployment/nginx-ingress.yaml
+
+# With MetalLB, IP will be allocated automatically
+kubectl patch -n ingress-nginx svc ingress-nginx --patch '{"spec": {"type": "LoadBalancer"}}'
