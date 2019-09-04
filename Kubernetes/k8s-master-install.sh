@@ -4,15 +4,14 @@
 # owner:       Hleb Kanonik /Junior System Engineer/ esscyh@gmail.com
 
 # Variables
-user="devops"
+user=root
 dockerRepo=https://download.docker.com/linux/centos/docker-ce.repo
 dockerJson=/etc/docker
 dockerConf=/etc/sysctl.d/docker.conf
 reposFolder=/etc/yum.repos.d
 nodeIp=192.168.56.225
 metalLbIp=192.168.56.240/28
-flanelLink="https://raw.githubusercontent.com/coreos/flannel/" \
-  "62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml"
+flanelLink=https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml
 metalLbLink=https://raw.githubusercontent.com/google/metallb/v0.8.0/manifests/metallb.yaml
 ingMandatory=https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
 ingCloudGeneric=https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
@@ -32,14 +31,22 @@ yum install -y deltarpm \
   bind-utiles \
   moreutils \
   yum-utils \
-  git
+  git \
+  device-mapper-persistent-data \
+  lvm2
+
+systemctl start ntpd
+systemctl enable ntpd
 
 # 2: Install Docker
 # 2.1: work via repository
-yum-config-manager --add-repo $dockerRepo
-yum-config-manager --enable docker-ce-edge
+yum-config-manager \
+  --add-repo \
+  https://download.docker.com/linux/centos/docker-ce.repo
+
 # 2.2: install docker
-yum install docker-ce docker-ce-cli containerd.io
+yum install -y docker-ce-18.09.8 docker-ce-cli-18.09.8 containerd.io
+# yum install -y docker-ce docker-ce-cli containerd.io
 
 # 2.4: add user to docker group (using witout 'sudo')
 if ! [ $(id -u) = 0 ]; then
@@ -71,8 +78,8 @@ tee $dockerJson/daemon.json <<EOF
 EOF
 
 # 5: Start Docker services
-systemctl enable docker
-systemctl start docker
+systemctl enable docker.service
+systemctl enable docker.service
 
 docker info | egrep "CGroup Driver"
 # 6: Enable passing bridged IPv4 traffice to iptables chains
@@ -98,7 +105,7 @@ EOF
 fi
 # 1.1: installing Kubernetes
 yum install -y kubelet kubeadm kubectl kubernetes-cni
-systemctl restart docker
+systemctl restart docker.service
 systemctl enable kubelet
 
 # Fix for Vagrant kubelet
@@ -115,9 +122,9 @@ sudo kubeadm init \
 if [[ ! -e $HOME/.kube ]]; then
 mkdir -p $HOME/.kube
 fi
-/bin/cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
 chown $(id -u):$(id -g) $HOME/.kube/config
-
+export KUBECONFIG=$HOME/admin.conf
 # 4: Deploying POD Network
 kubectl apply -f $flanelLink
 kubectl patch daemonsets kube-flannel-ds-amd64 -n kube-system --patch='{
