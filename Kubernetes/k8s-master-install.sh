@@ -4,7 +4,7 @@
 # owner:       Hleb Kanonik /Junior System Engineer/ esscyh@gmail.com
 
 # Variables
-user=root
+user=vagrant
 dockerRepo=https://download.docker.com/linux/centos/docker-ce.repo
 dockerJson=/etc/docker
 dockerConf=/etc/sysctl.d/docker.conf
@@ -45,7 +45,7 @@ yum-config-manager \
   https://download.docker.com/linux/centos/docker-ce.repo
 
 # 2.2: install docker
-yum install -y docker-ce-18.09.8 docker-ce-cli-18.09.8 containerd.io
+yum install -y docker-ce-18.09.8
 # yum install -y docker-ce docker-ce-cli containerd.io
 
 # 2.4: add user to docker group (using witout 'sudo')
