@@ -10,8 +10,8 @@ dockerJson=/etc/docker
 dockerConf=/etc/sysctl.d/docker.conf
 reposFolder=/etc/yum.repos.d
 # nodeIp = ipaddres VM
-nodeIp=192.168.56.225
-metalLbIp=192.168.56.240/28
+nodeIp=172.17.51.36
+metalLbIp=172.17.51.240/28
 flanelLink=https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml
 metalLbLink=https://raw.githubusercontent.com/google/metallb/v0.8.0/manifests/metallb.yaml
 ingMandatory=https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
@@ -80,7 +80,7 @@ EOF
 
 # 5: Start Docker services
 systemctl enable docker.service
-systemctl enable docker.service
+systemctl start docker.service
 
 docker info | egrep "CGroup Driver"
 # 6: Enable passing bridged IPv4 traffice to iptables chains
@@ -113,18 +113,20 @@ systemctl enable kubelet
 sed -i "s/\(KUBELET_EXTRA_ARGS=\).*/\1--node-ip=$nodeIp/" /etc/sysconfig/kubelet
 
 # 2: Cluster Initialization
-sudo kubeadm init \
+kubeadm init \
   --pod-network-cidr=10.244.0.0/16 \
   --apiserver-advertise-address $nodeIp
 
+# kubeadm join 172.17.51.36:6443 --token 0izskl.x1paurjk6c6ovwvx \
+#    --discovery-token-ca-cert-hash sha256:d7ecf99ed6e4d39ce0e3591fad4be23a292e353cff9f510f0280130decd32b7e
+
+
 # 3: Saveing config
 # also reply thsi step in you local PC
-if [[ ! -e $HOME/.kube ]]; then
 mkdir -p $HOME/.kube
-fi
 sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
 chown $(id -u):$(id -g) $HOME/.kube/config
-export KUBECONFIG=$HOME/admin.conf
+
 # 4: Deploying POD Network
 kubectl apply -f $flanelLink
 kubectl patch daemonsets kube-flannel-ds-amd64 -n kube-system --patch='{
@@ -187,3 +189,10 @@ kubectl apply -f deployment/nginx-ingress.yaml
 
 # With MetalLB, IP will be allocated automatically
 kubectl patch -n ingress-nginx svc ingress-nginx --patch '{"spec": {"type": "LoadBalancer"}}'
+
+# autocompletion
+yum install -y bash-completion
+echo "source <(kubectl completion bash)" >> ~/.bashrc
+
+# disbled master node protection
+# kubectl taint nodes --all node-role.Skubernetes.io/master-
