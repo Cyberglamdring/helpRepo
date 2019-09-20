@@ -1,8 +1,4 @@
 #!/bin/bash
-# description: This bash script installing master POD on CentOS
-# date:        9/4/2019
-# owner:       Hleb Kanonik /Junior System Engineer/ esscyh@gmail.com
-
 # Variables
 user=vagrant
 dockerRepo=https://download.docker.com/linux/centos/docker-ce.repo
