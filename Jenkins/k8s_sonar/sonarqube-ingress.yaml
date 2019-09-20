@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: sonar
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+  - hosts:
+    - sonar.local
+  rules:
+  - host: sonar.local
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: sonar
+          servicePort: 80
