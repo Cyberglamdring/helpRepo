@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nexus3-ingress
+  namespace: nexus3
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+  - hosts:
+    - nexus.local
+  rules:
+  - host: nexus.local
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nexus3-service
+          servicePort: 80
