@@ -130,6 +130,7 @@ EOF
 			"""
                 }
 		/*
+		// So simple Sanity check
   		stage ('9: Sanity check') {
       			def response_value = 'HelloWorldService?wsdl'
        			try {
