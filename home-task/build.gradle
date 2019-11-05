@@ -1,0 +1,30 @@
+apply plugin: 'java'
+jar.baseName = 'hkanonik'  // custom name
+
+task hello {
+    doLast {
+        println 'Hello, MNT Lab'
+    }
+}
+
+dependencies {
+        repositories { 
+                mavenCentral()  //this section tells gradle where to find dependencies
+        }
+        compile group: 'junit', name: 'junit', version: '4.4' //adding dependency
+}
+
+/* 
+task archive ( type: Tar) {
+        from 'build'
+        println archive.archiveName
+        println relativePath(archive.destinationDir)
+        println relativePath(archive.archivePath)
+}
+
+
+task copytar( type: Copy) {
+        from 'build/distributions/simple-sample.tar'
+        into '/home/student/devosplab/Jenkins/day02jen/git/build-t00ls/simple-sample'
+}
+*/
